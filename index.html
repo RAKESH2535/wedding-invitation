@@ -55,7 +55,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px; /* Slightly larger for better icon visibility */
+      font-size: 20px;
     }
     @media (max-width: 700px) {
       html, body {
@@ -73,13 +73,13 @@
 </head>
 <body>
   <div class="portrait-wrap" id="wrap">
-    <video id="bgVideo" loop playsinline preload="auto">
+    <video id="bgVideo" loop playsinline preload="auto" muted autoplay>
       <source src="assets/Invitation-video.mp4" type="video/mp4">
       Your browser does not support the video tag.
     </video>
 
     <div class="controls">
-      <button class="btn" id="muteBtn">🔊</button>
+      <button class="btn" id="muteBtn">🔇</button>
       <a href="assets/Invitation-video.mp4" download class="btn" title="Download Video">⬇️</a>
     </div>
   </div>
@@ -89,22 +89,46 @@
     const wrap = document.getElementById('wrap');
     const muteBtn = document.getElementById('muteBtn');
 
-    // Try autoplay
-    video.play().catch(() => { video.muted = true; video.play(); });
+    // Track state
+    let isPlaying = true;
+    let isMuted = true;
+    let firstClick = true;
 
-    // Toggle play/pause on click
+    // Click on video wrapper
     wrap.addEventListener('click', (e) => {
-      if (e.target.closest('.controls')) return; // ignore clicks on controls
-      if (video.paused) {
+      if (e.target.closest('.controls')) return;
+
+      if (firstClick) {
+        // First click: play with sound
+        video.muted = false;
+        muteBtn.textContent = '🔊';
+        firstClick = false;
+        isMuted = false;
+        isPlaying = true;
         video.play();
-      } else {
+        return;
+      }
+
+      if (isPlaying) {
         video.pause();
+        video.muted = true;
+        muteBtn.textContent = '🔇';
+        isPlaying = false;
+        isMuted = true;
+      } else {
+        video.play();
+        video.muted = false;
+        muteBtn.textContent = '🔊';
+        isPlaying = true;
+        isMuted = false;
       }
     });
 
-    // Toggle mute/unmute
-    muteBtn.addEventListener('click', () => {
+    // Mute button
+    muteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       video.muted = !video.muted;
+      isMuted = video.muted;
       muteBtn.textContent = video.muted ? '🔇' : '🔊';
     });
   </script>
